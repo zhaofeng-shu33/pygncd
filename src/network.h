@@ -15,7 +15,8 @@ int cmpBtwn(DEL_ORDER *e1, DEL_ORDER *e2);
 void removeEdge(int vIdx1, int vIdx2);
 void resetVertices();
 void handleDeletion();
-void computeGN(int initialRoot);
+void computeGN(int initIdx, int endIdx);
+double square (double x); //faster than pow() for doubles
 
 typedef struct {
   int target;        // Index in the vertex[] array of neighboring vertex.

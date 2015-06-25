@@ -9,9 +9,10 @@
 DEL_ORDER  *delOrder;
 NETWORK    *network = NULL;
 clock_t    begin,end;
-int        delOrderSize = 0,
-		   edges = 0,
-		   step = 1;
+int        delOrderSize = 0, // size of delOrder[]
+		   totalEdges = 0, 	 // total edges
+		   edgeCnt = 0, 	 // counter for edges
+		   step = 1; 	 	 // steps of the GN alg
 
 int main()
 {
@@ -30,45 +31,50 @@ int main()
 	// parse file into NETWORK structure
 	read_network(network,fp);
 
-	// compute number of edges
+	// compute number of edgeCnt
 	for (vertexIdx = 0; vertexIdx < network->nvertices;vertexIdx++)
 	{
-		edges += network->vertex[vertexIdx].degree;
+		edgeCnt += network->vertex[vertexIdx].degree;
 	}
 
-	delOrderSize = edges;
+	delOrderSize = edgeCnt;
 	delOrder = (DEL_ORDER *) malloc(delOrderSize * sizeof(DEL_ORDER));
-	edges /= 2;
+	edgeCnt /= 2;
+	totalEdges = edgeCnt;
 
 	printf("Nodes: %d\n", network->nvertices);
-	printf("Edges: %d\n\n", edges);
+	printf("Edges: %d\n\n", edgeCnt);
 
-	while(edges > 0)
+	while(edgeCnt > 0)
 	{
-		computeGN(0);
+		computeGN(0,network->nvertices);
 		handleDeletion();
 	}
 
 	end = clock();
-	printf("\nExecution time: %lfs", (double)(end - begin) / CLOCKS_PER_SEC);
+	printf("\nExecution time: %lf", (double)(end - begin) / CLOCKS_PER_SEC);
 	free(delOrder);
 	free_network(network);
 }
 
-void computeGN(int initialRoot)
+void computeGN(int initIdx, int endIdx)
 {
-	VERTEXNODE *head;
-	VERTEXNODE *tail;
-	VERTEXNODE *temp;
+	VERTEXNODE *head,
+			   *tail,
+			   *temp;
+	double     modularity = 0;
 	int 	   communityPrinted,
+	   	   	   comDegreeTotal = 0,  // total degree  of nodes in community
+	   	   	   comEdgeTotal = 0, // total edges in the community
 			   vertexIdx,
 	           degreeIdx,
 			   edgeIdx;
 
+
 	printf("Communities: \n");
 	memset(delOrder, 0, delOrderSize*sizeof(*delOrder));
 
-	for (vertexIdx = 0; vertexIdx < network->nvertices; vertexIdx++)
+	for (vertexIdx = initIdx; vertexIdx < endIdx; vertexIdx++)
 	{
 		head = (VERTEXNODE *) malloc(sizeof(VERTEXNODE));
 		communityPrinted = 0;
@@ -86,11 +92,11 @@ void computeGN(int initialRoot)
 
 		while (head)
 		{
-			// add nodes not visited to list
 			for (degreeIdx = 0; degreeIdx < network->vertex[head->vertexIdx].degree; degreeIdx++)
 			{
 				edgeIdx = network->vertex[head->vertexIdx].edge[degreeIdx].target;
 
+				// add nodes not visited to list
 				if (0 == network->vertex[edgeIdx].visited)
 				{
 					tail->next = malloc(sizeof(VERTEXNODE));
@@ -103,7 +109,7 @@ void computeGN(int initialRoot)
 					network->vertex[tail->vertexIdx].visited = 1;
 					network->vertex[tail->vertexIdx].flowAvail = 1;
 
-					// compute BFS
+					// compute BFS value
 					network->vertex[tail->vertexIdx].bfsLevel = network->vertex[head->vertexIdx].bfsLevel + 1;
 
 					if(1 == network->vertex[tail->vertexIdx].bfsLevel)
@@ -128,10 +134,13 @@ void computeGN(int initialRoot)
 			// print the separate communities. We need to mark the vertex as "grouped"
 			// so that we don't print the community as many times as it has members.
 			// aka, only print it from one community members perspective
+
 			if (network->vertex[head->vertexIdx].grouped == 0)
 			{
 				printf("%02d ", network->vertex[head->vertexIdx].id);
 				network->vertex[head->vertexIdx].grouped = 1;
+				comDegreeTotal += network->vertex[head->vertexIdx].degree;
+				comEdgeTotal = comDegreeTotal/2;
 				communityPrinted = 1;
 			}
 
@@ -144,8 +153,8 @@ void computeGN(int initialRoot)
 				{
 					// the flow of the edge is the flow available from the lower node times the ratio of shortest paths
 					network->vertex[head->vertexIdx].edge[degreeIdx].flow = ((network->vertex[head->vertexIdx].flowAvail) *
-																	((double)(network->vertex[edgeIdx].shortPaths) /
-																	((double)network->vertex[head->vertexIdx].shortPaths)));
+																	        ((double)(network->vertex[edgeIdx].shortPaths) /
+																	        ((double)network->vertex[head->vertexIdx].shortPaths)));
 
 					if (0 == network->vertex[edgeIdx].bfsLevel)
 					{
@@ -172,12 +181,16 @@ void computeGN(int initialRoot)
 
 		if(communityPrinted)
 		{
-			printf("\n\n");
+			printf("\n");
+			modularity += ((double)comEdgeTotal/(double)(totalEdges)) - (square(comDegreeTotal) / (4*square(totalEdges)));
+			comDegreeTotal = 0;
+			comEdgeTotal = 0;
 		}
 	}
+	printf("\nModularity: %f\n\n", modularity);
 }
 
-// adds flows to delOrder array. sorts and removes edges from graph
+// adds flows to delOrder array. sorts and removes edgeCnt from graph
 // resets flowSum for each node
 void handleDeletion()
 {
@@ -213,44 +226,47 @@ void handleDeletion()
 		}
 	}
 
-	// sort the edges according to cmpBtwn: highest to lowest
+	// sort the edgeCnt according to cmpBtwn: highest to lowest
 	qsort(delOrder,(orderIdx),sizeof(DEL_ORDER),(void*)cmpBtwn);
 
 	printf("Step %d:\n", step);
 	delOrderIdx = -1;
 	do{
 		delOrderIdx++;
+		//remove the edge from each vertex it belongs to
 		removeEdge(delOrder[delOrderIdx].vertex1Idx,delOrder[delOrderIdx].vertex2Idx);
 		removeEdge(delOrder[delOrderIdx].vertex2Idx,delOrder[delOrderIdx].vertex1Idx);
-		edges--;
+		edgeCnt--;
 
 		printf("%02d <-> %02d = %.2f\n", network->vertex[delOrder[delOrderIdx].vertex1Idx].id,
-											network->vertex[delOrder[delOrderIdx].vertex2Idx].id,
-											delOrder[delOrderIdx].flow);
-
-		//computeGN(delOrder[delOrderIdx].vertex1Idx);
+										 network->vertex[delOrder[delOrderIdx].vertex2Idx].id,
+										 delOrder[delOrderIdx].flow);
 	}while(fabs(delOrder[delOrderIdx].flow - delOrder[delOrderIdx+1].flow) < ERROR_BOUND);
+
 	printf("\n----------------------------------------\n");
 	// we check the difference above to account for rounding errors with doubles
 	// eg 3.99999997 vs 4.0
+
 	step++;
 	printf("\n");
-
 }
 
 // removes edges from vertices and shifts edge[] array left accordingly
 void removeEdge(int vIdx1, int vIdx2)
 {
-	int j,k;
+	int degreeShift,
+		degreeIdx;
 
-	for (k = 0; k < network->vertex[vIdx1].degree; k++)
+	for (degreeIdx = 0; degreeIdx < network->vertex[vIdx1].degree; degreeIdx++)
 	{
-		if ((vIdx2) == (network->vertex[vIdx1].edge[k].target))
+		if ((vIdx2) == (network->vertex[vIdx1].edge[degreeIdx].target))
 		{
-			for (j = k; j < network->vertex[vIdx1].degree; j++)
+			// we found vIdx2 in vIdx2 target array. shift everything in target array down/left by 1
+			// and decrement the degree since we have removed an edge
+			for (degreeShift = degreeIdx; degreeShift < network->vertex[vIdx1].degree; degreeShift++)
 			{
-				network->vertex[vIdx1].edge[j] =
-						network->vertex[vIdx1].edge[j+1];
+				network->vertex[vIdx1].edge[degreeShift] =
+						network->vertex[vIdx1].edge[degreeShift+1];
 			}
 			network->vertex[vIdx1].degree--;
 		}
@@ -262,9 +278,9 @@ void removeEdge(int vIdx1, int vIdx2)
 // return -1 when e1 should be before e2
 int cmpBtwn(DEL_ORDER *e1, DEL_ORDER *e2)
 {
-  if (e1->flow < e2->flow) return 1;
-  if (e1->flow > e2->flow) return -1;
-  return 0;
+	if (e1->flow < e2->flow) return 1;
+	if (e1->flow > e2->flow) return -1;
+	return 0;
 }
 
 // reset the vertices shortest path and visited variables for the next
@@ -278,4 +294,10 @@ void resetVertices()
 		network->vertex[vertexIdx].visited = 0;
 		network->vertex[vertexIdx].shortPaths = 0;
 	}
+}
+
+// squares a double
+double square (double x)
+{
+	return (x * x);
 }
