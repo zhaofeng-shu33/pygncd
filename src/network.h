@@ -37,7 +37,7 @@ typedef struct {
   double flowAvail;  // flow available to send up
   char *label;       // GML label of vertex.  NULL if no label specified
   EDGE *edge;        // Array of EDGE structs, one for each neighbor
-  int grouped;
+  int grouped;		 // indicates if a node has been placed in a community yet
 } VERTEX;
 
 typedef struct {

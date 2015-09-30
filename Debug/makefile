@@ -44,7 +44,7 @@ all: testytesttest
 testytesttest: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MacOS X C++ Linker'
-	g++  -o "testytesttest" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -O3 -o "testytesttest" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

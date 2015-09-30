@@ -20,7 +20,7 @@ int main()
 	int  vertexIdx;
 
 	network  = (NETWORK*) malloc(sizeof(NETWORK));
-	fp = fopen("./test.gml", "r");
+	fp = fopen("./karate.gml", "r");
 
 	if (fp == NULL)
 	{
@@ -43,13 +43,16 @@ int main()
 	totalEdges = edgeCnt;
 
 	printf("Nodes: %d\n", network->nvertices);
-	printf("Edges: %d\n\n", edgeCnt);
+	printf("Edges: %d\n\n", totalEdges);
 
 	while(edgeCnt > 0)
 	{
 		computeGN(0,network->nvertices);
 		handleDeletion();
 	}
+
+	printf("Nodes: %d\n", network->nvertices);
+	printf("Edges: %d\n\n", totalEdges);
 
 	end = clock();
 	printf("\nExecution time: %lf", (double)(end - begin) / CLOCKS_PER_SEC);
@@ -149,7 +152,7 @@ void computeGN(int initIdx, int endIdx)
 				edgeIdx = network->vertex[head->vertexIdx].edge[degreeIdx].target;
 				// get the ratio of flow that should be sent to each node that has BFS level lower than
 				// current nodes BFS (flow should only go up, not sideways or down)
-				if(network->vertex[edgeIdx].bfsLevel < network->vertex[head->vertexIdx].bfsLevel)
+				 if(network->vertex[edgeIdx].bfsLevel < network->vertex[head->vertexIdx].bfsLevel)
 				{
 					// the flow of the edge is the flow available from the lower node times the ratio of shortest paths
 					network->vertex[head->vertexIdx].edge[degreeIdx].flow = ((network->vertex[head->vertexIdx].flowAvail) *
