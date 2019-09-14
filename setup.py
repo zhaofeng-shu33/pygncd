@@ -21,7 +21,7 @@ def set_up_cython_extension():
     sourcefiles = ['pygncd.pyx']
     sourcefiles.extend(find_all_c_files(os.path.join(os.getcwd(), 'gn')))
     extensions = [
-        Extension('pspartition', sourcefiles,
+        Extension('pygncd', sourcefiles,
                   include_dirs=extra_include_path,
                  )
     ]

@@ -1,10 +1,11 @@
 from libc.stdlib cimport malloc, free
 
 cdef extern from "gn/network.h":
-    struct NETWORK:
-        pass
+    struct NETWORK
     struct LABELLIST:
          LABELLIST* next
+         LABELLIST* prev
+         int* labels
     void construct_network(NETWORK**, double**, int, int)
 
 cdef extern from "gn/gn.h":
@@ -14,7 +15,7 @@ cdef gn_inner_routine(networkx_graph):
     cdef int nedges, nvertices
     cdef int i
     cdef NETWORK* network
-    cdef LABELLIST* label_header
+    cdef LABELLIST* label_header, *tmp
     cdef double** array_list
     nedges = len(networkx_graph.nodes)
     nvertices = len(networkx_graph.edges)
@@ -32,10 +33,19 @@ cdef gn_inner_routine(networkx_graph):
     
     construct_network(&network, array_list, nedges, nvertices)
     girvan_newman(network, label_header)
-    #while label_header.next != NULL:
-    #    label_header = label_header.next
-    #while label_header->prev != NULL:
-    #    pass
+    py_labels_list = []
+    while label_header.next != NULL:
+        py_labels = []
+        label_header = label_header.next
+        for i in range(nvertices):
+            py_labels.append(label_header.labels[i])
+        py_labels_list.append(py_labels)
+    while label_header.prev != NULL:
+        tmp = label_header.prev
+        free(label_header.labels)
+        free(label_header)
+        label_header = tmp
     for i in range(nedges):
         free(array_list[i])
     free(array_list)
+    return py_labels_list
