@@ -45,7 +45,7 @@ typedef struct {
   VERTEX *vertex;    // Array of VERTEX structs, one for each vertex
 } NETWORK;
 
-void construct_network(NETWORK** network_ptr, double** array_list, int num_edges, int num_vertices);
+void construct_network(NETWORK** network_ptr, double array_list[][3], int num_edges, int num_vertices);
 
 typedef struct VERTEXNODE
 {

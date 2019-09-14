@@ -6,7 +6,7 @@ cdef extern from "gn/network.h":
          LABELLIST* next
          LABELLIST* prev
          int* labels
-    void construct_network(NETWORK**, double**, int, int)
+    void construct_network(NETWORK** network, double array_list[][3], int num_edges, int num_vertices)
 
 cdef extern from "gn/gn.h":
     void girvan_newman(NETWORK*, LABELLIST*)
@@ -16,13 +16,11 @@ cpdef gn_inner_routine(networkx_graph):
     cdef int i
     cdef NETWORK* network
     cdef LABELLIST* label_header, *tmp
-    cdef double** array_list
+    cdef double (*array_list)[3]
     nedges = len(networkx_graph.nodes)
     nvertices = len(networkx_graph.edges)
-    array_list = <double**>malloc(sizeof(double*) * nedges)
+    array_list = <double(*)[3]>malloc(3 * sizeof(double) * nedges)
     label_header = <LABELLIST*>malloc(sizeof(LABELLIST))
-    for i in range(nedges):
-        array_list[i] = <double*>malloc(sizeof(double*) * 3)
     
     i = 0
     smallest_node_index = next(networkx_graph.nodes.__iter__())
@@ -46,7 +44,5 @@ cpdef gn_inner_routine(networkx_graph):
         free(label_header.labels)
         free(label_header)
         label_header = tmp
-    for i in range(nedges):
-        free(array_list[i])
     free(array_list)
     return py_labels_list
