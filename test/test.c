@@ -33,6 +33,9 @@ void test_complete_routine()
         printf("\n");
         label_header = label_header->next;
     }
+    for (int i = 0; i < network->nvertices; i++)
+        printf("%d ", label_header->labels[i]);
+    printf("\n");
     while (label_header->prev != NULL) {
         LABELLIST* tmp = label_header->prev;
         int* labels = label_header->labels;

@@ -277,11 +277,17 @@ void girvan_newman(NETWORK* network, LABELLIST *label_header) {
         handleDeletion(network, delOrder);
         
     }
+    label_header->next = malloc(sizeof(LABELLIST));
+    label_header->next->labels = calloc(network->nvertices, sizeof(int));
+    (label_header->next)->prev = label_header;
+    label_header = label_header->next;
+    ncomponents = get_community_structure(network, label_header->labels);
+    label_header->next = NULL;
+
 #if _DEBUG
     printf("Nodes: %d\n", network->nvertices);
     printf("Edges: %d\n\n", network->nedges);
 #endif
-    label_header->next = NULL;
     free(delOrder);
 }
 
