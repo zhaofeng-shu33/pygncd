@@ -253,7 +253,7 @@ void girvan_newman(NETWORK* network, LABELLIST *label_header) {
     delOrderSize = network->nedges;
     delOrder = (DEL_ORDER *)malloc(delOrderSize * sizeof(DEL_ORDER));
     label_header->prev = NULL;
-    label_header->labels = (int*)malloc(network->nvertices * sizeof(int));
+    label_header->labels = calloc(network->nvertices, sizeof(int));
     int ncomponents = get_community_structure(network, label_header->labels);
 #if _DEBUG
     printf("Nodes: %d\n", network->nvertices);
@@ -269,7 +269,7 @@ void girvan_newman(NETWORK* network, LABELLIST *label_header) {
         computeGN(network, 0, network->nvertices);
         if (ncomponents < network->ncomponents) {
             label_header->next = malloc(sizeof(LABELLIST));
-            label_header->next->labels = (int*)malloc(network->nvertices * sizeof(int));
+            label_header->next->labels = calloc(network->nvertices, sizeof(int));
             (label_header->next)->prev = label_header;
             label_header = label_header->next;
             ncomponents = get_community_structure(network, label_header->labels);

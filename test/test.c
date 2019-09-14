@@ -35,7 +35,8 @@ void test_complete_routine()
     }
     while (label_header->prev != NULL) {
         LABELLIST* tmp = label_header->prev;
-        free(label_header->labels);
+        int* labels = label_header->labels;
+        free(labels);
         free(label_header);
         label_header = tmp;
     }
