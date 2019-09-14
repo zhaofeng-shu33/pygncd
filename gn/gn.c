@@ -27,7 +27,7 @@ void computeGN(NETWORK* network, int initIdx, int endIdx)
 #if _DEBUG
 	printf("Communities: \n");
 #endif	
-
+    network->ncomponents = 0;
 	for (vertexIdx = initIdx; vertexIdx < endIdx; vertexIdx++)
 	{
 		head = (VERTEXNODE *) malloc(sizeof(VERTEXNODE));
@@ -137,6 +137,7 @@ void computeGN(NETWORK* network, int initIdx, int endIdx)
 
 		if(communityPrinted)
 		{
+            network->ncomponents++;
 #if _DEBUG
 			printf("\n");
 #endif
@@ -228,15 +229,7 @@ void removeEdge(NETWORK* network, int vIdx1, int vIdx2)
 	}
 }
 
-// compare edge flows highest to lowest
-// return 1 when e1 should be after e2
-// return -1 when e1 should be before e2
-int cmpBtwn(DEL_ORDER *e1, DEL_ORDER *e2)
-{
-	if (e1->flow < e2->flow) return 1;
-	if (e1->flow > e2->flow) return -1;
-	return 0;
-}
+
 
 // reset the vertices shortest path and visited variables for the next
 // round with a new root node
@@ -251,19 +244,17 @@ void resetVertices(NETWORK* network)
 	}
 }
 
-// squares a double
-double square (double x)
-{
-	return (x * x);
-}
+// after usage of label_header, it is the user's responsibility to free the memory used
 
-void girvan_newman(NETWORK* network) {
+void girvan_newman(NETWORK* network, LABELLIST *label_header) {
     DEL_ORDER* delOrder;
     int        delOrderSize; // size of delOrder[]        
     int step = 0;
     delOrderSize = network->nedges;
     delOrder = (DEL_ORDER *)malloc(delOrderSize * sizeof(DEL_ORDER));
-
+    label_header->prev = NULL;
+    label_header->labels = calloc(network->nvertices, sizeof(int));
+    int ncomponents = get_community_structure(network, label_header->labels);
 #if _DEBUG
     printf("Nodes: %d\n", network->nvertices);
     printf("Edges: %d\n\n", network->nedges);
@@ -276,12 +267,107 @@ void girvan_newman(NETWORK* network) {
 #endif
         memset(delOrder, 0, delOrderSize * sizeof(*delOrder));
         computeGN(network, 0, network->nvertices);
+        if (ncomponents < network->ncomponents) {
+            label_header->next = malloc(sizeof(LABELLIST));
+            label_header->next->labels = calloc(network->nvertices, sizeof(int));
+            (label_header->next)->prev = label_header;
+            label_header = label_header->next;
+            ncomponents = get_community_structure(network, label_header->labels);
+        }
         handleDeletion(network, delOrder);
         
     }
+    label_header->next = malloc(sizeof(LABELLIST));
+    label_header->next->labels = calloc(network->nvertices, sizeof(int));
+    (label_header->next)->prev = label_header;
+    label_header = label_header->next;
+    ncomponents = get_community_structure(network, label_header->labels);
+    label_header->next = NULL;
+
 #if _DEBUG
     printf("Nodes: %d\n", network->nvertices);
     printf("Edges: %d\n\n", network->nedges);
 #endif
     free(delOrder);
+}
+
+// ncomponents is returned
+
+int get_community_structure(NETWORK* network, int* labels) {
+    VERTEXNODE *head,
+        *tail,
+        *temp;
+    int    vertexIdx,
+        degreeIdx,
+        edgeIdx;
+    int label_index = -1;
+    int initIdx = 0;
+    int endIdx = network->nvertices;    
+    int *grouped;
+    grouped = calloc(network->nvertices, sizeof(int));
+    for (vertexIdx = initIdx; vertexIdx < endIdx; vertexIdx++)
+    {
+        if (grouped[vertexIdx])
+            continue;
+        label_index++;
+        head = (VERTEXNODE *)malloc(sizeof(VERTEXNODE));
+
+        // init head to root
+        head->vertexIdx = vertexIdx;
+        // mark root visited and prime depth
+        network->vertex[head->vertexIdx].visited = 1;
+        head->prev = NULL;
+        tail = head;
+        // prevents corruption if head-next is valid when it
+        // shouldn't be
+        head->next = NULL;
+
+        while (head)
+        {
+            for (degreeIdx = 0; degreeIdx < network->vertex[head->vertexIdx].degree; degreeIdx++)
+            {
+                edgeIdx = network->vertex[head->vertexIdx].edge[degreeIdx].target;
+
+                // add nodes not visited to list
+                if (0 == network->vertex[edgeIdx].visited)
+                {
+                    tail->next = malloc(sizeof(VERTEXNODE));
+                    (tail->next)->prev = tail;
+                    tail = tail->next;
+                    tail->next = NULL;
+                    tail->vertexIdx = edgeIdx;
+
+                    // mark visited
+                    network->vertex[tail->vertexIdx].visited = 1;
+
+                }
+            }
+            head = head->next;
+        }
+
+        // go back through the list to the root node
+        head = tail;
+
+        while (head)
+        {
+            // find the separate communities. We need to mark the vertex as "grouped"
+            // so that we don't print the community as many times as it has members.
+            // aka, only print it from one community members perspective
+
+            if (grouped[head->vertexIdx] == 0)
+            {
+                labels[head->vertexIdx] = label_index;
+                grouped[head->vertexIdx] = 1;
+            }
+       
+            temp = head->prev;
+            // cleanup on the way out
+            free(head);
+            head = temp;
+        }
+
+    }
+    free(grouped);
+    resetVertices(network);
+    return label_index + 1;
 }

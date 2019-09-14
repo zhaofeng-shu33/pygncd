@@ -1,1 +1,1 @@
-add_library(gn gn.c readgml.c)
+add_library(gn gn.c readgml.c network.c)
