@@ -6,10 +6,12 @@
 void test_complete_routine()
 {
     NETWORK* network = NULL;
+    LABELLIST *label_header = NULL;
     clock_t    begin, end;
 	FILE *fp;
 
 	network  = (NETWORK*) malloc(sizeof(NETWORK));
+    label_header = (LABELLIST*)malloc(sizeof(LABELLIST));
 	fp = fopen("./karate.gml", "r");
 
 	if (fp == NULL)
@@ -21,11 +23,22 @@ void test_complete_routine()
 	read_network(network, fp);
     begin = clock();
 
-    girvan_newman(network);
+    girvan_newman(network, label_header);
 
     end = clock();
-    printf("\nExecution time: %lf", (double)(end - begin) / CLOCKS_PER_SEC);
-
+    printf("\nExecution time: %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
+    while (label_header->next != NULL) {
+        for (int i = 0; i < network->nvertices; i++)
+            printf("%d ", label_header->labels[i]);
+        printf("\n");
+        label_header = label_header->next;
+    }
+    while (label_header->prev != NULL) {
+        LABELLIST* tmp = label_header->prev;
+        free(label_header->labels);
+        free(label_header);
+        label_header = tmp;
+    }
 	free_network(network);
 }
 void test_get_community_structure() {

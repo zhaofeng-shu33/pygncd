@@ -244,15 +244,17 @@ void resetVertices(NETWORK* network)
 	}
 }
 
+// after usage of label_header, it is the user's responsibility to free the memory used
 
-
-void girvan_newman(NETWORK* network) {
+void girvan_newman(NETWORK* network, LABELLIST *label_header) {
     DEL_ORDER* delOrder;
     int        delOrderSize; // size of delOrder[]        
     int step = 0;
     delOrderSize = network->nedges;
     delOrder = (DEL_ORDER *)malloc(delOrderSize * sizeof(DEL_ORDER));
-
+    label_header->prev = NULL;
+    label_header->labels = (int*)malloc(network->nvertices * sizeof(int));
+    int ncomponents = get_community_structure(network, label_header->labels);
 #if _DEBUG
     printf("Nodes: %d\n", network->nvertices);
     printf("Edges: %d\n\n", network->nedges);
@@ -265,6 +267,13 @@ void girvan_newman(NETWORK* network) {
 #endif
         memset(delOrder, 0, delOrderSize * sizeof(*delOrder));
         computeGN(network, 0, network->nvertices);
+        if (ncomponents < network->ncomponents) {
+            label_header->next = malloc(sizeof(LABELLIST));
+            label_header->next->labels = (int*)malloc(network->nvertices * sizeof(int));
+            (label_header->next)->prev = label_header;
+            label_header = label_header->next;
+            ncomponents = get_community_structure(network, label_header->labels);
+        }
         handleDeletion(network, delOrder);
         
     }
@@ -272,6 +281,7 @@ void girvan_newman(NETWORK* network) {
     printf("Nodes: %d\n", network->nvertices);
     printf("Edges: %d\n\n", network->nedges);
 #endif
+    label_header->next = NULL;
     free(delOrder);
 }
 
@@ -286,8 +296,7 @@ int get_community_structure(NETWORK* network, int* labels) {
         edgeIdx;
     int label_index = -1;
     int initIdx = 0;
-    int endIdx = network->nvertices;
-    resetVertices(network);
+    int endIdx = network->nvertices;    
     int *grouped;
     grouped = calloc(network->nvertices, sizeof(int));
     for (vertexIdx = initIdx; vertexIdx < endIdx; vertexIdx++)
@@ -353,5 +362,6 @@ int get_community_structure(NETWORK* network, int* labels) {
 
     }
     free(grouped);
+    resetVertices(network);
     return label_index + 1;
 }
