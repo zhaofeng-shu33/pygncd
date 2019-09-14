@@ -1,4 +1,4 @@
-#include "readgml.h"
+#include "gn.h"
 #include "stdlib.h"
 #include "string.h"
 #include "math.h"
@@ -6,61 +6,11 @@
 
 #define ERROR_BOUND .0001
 
-DEL_ORDER  *delOrder;
-NETWORK    *network = NULL;
-clock_t    begin,end;
-int        delOrderSize = 0, // size of delOrder[]
-		   totalEdges = 0, 	 // total edges
-		   edgeCnt = 0, 	 // counter for edges
-		   step = 1; 	 	 // steps of the GN alg
 
-int main()
-{
-	FILE *fp;
-	int  vertexIdx;
 
-	network  = (NETWORK*) malloc(sizeof(NETWORK));
-	fp = fopen("./karate.gml", "r");
 
-	if (fp == NULL)
-	{
-	  fprintf(stderr, "Can't open input file\n");
-	  exit(1);
-	}
 
-	// parse file into NETWORK structure
-	read_network(network,fp);
-
-	// compute number of edgeCnt
-	for (vertexIdx = 0; vertexIdx < network->nvertices;vertexIdx++)
-	{
-		edgeCnt += network->vertex[vertexIdx].degree;
-	}
-
-	delOrderSize = edgeCnt;
-	delOrder = (DEL_ORDER *) malloc(delOrderSize * sizeof(DEL_ORDER));
-	edgeCnt /= 2;
-	totalEdges = edgeCnt;
-
-	printf("Nodes: %d\n", network->nvertices);
-	printf("Edges: %d\n\n", totalEdges);
-
-	while(edgeCnt > 0)
-	{
-		computeGN(0,network->nvertices);
-		handleDeletion();
-	}
-
-	printf("Nodes: %d\n", network->nvertices);
-	printf("Edges: %d\n\n", totalEdges);
-
-	end = clock();
-	printf("\nExecution time: %lf", (double)(end - begin) / CLOCKS_PER_SEC);
-	free(delOrder);
-	free_network(network);
-}
-
-void computeGN(int initIdx, int endIdx)
+void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, int delOrderSize, int totalEdges)
 {
 	VERTEXNODE *head,
 			   *tail,
@@ -180,7 +130,7 @@ void computeGN(int initIdx, int endIdx)
 			head = temp;
 		}
 
-		resetVertices();
+		resetVertices(network);
 
 		if(communityPrinted)
 		{
@@ -195,7 +145,7 @@ void computeGN(int initIdx, int endIdx)
 
 // adds flows to delOrder array. sorts and removes edgeCnt from graph
 // resets flowSum for each node
-void handleDeletion()
+void handleDeletion(NETWORK* network, DEL_ORDER* delOrder, int* delOrderSize, int* edgeCnt)
 {
 	int delOrderIdx,
 		vertexIdx,
@@ -210,10 +160,10 @@ void handleDeletion()
 		{
 			edgeIdx = network->vertex[vertexIdx].edge[degreeIdx].target;
 			// realloc size of delOrder if need be...double it to be safe...realloc is expensive...
-			if ((orderIdx + 1) > delOrderSize)
+			if ((orderIdx + 1) > (*delOrderSize))
 			{
-				delOrderSize = delOrderSize*2;
-				delOrder = (DEL_ORDER *) realloc(delOrder, (delOrderSize*2) * sizeof(DEL_ORDER));
+				(*delOrderSize) = (*delOrderSize)*2;
+				delOrder = (DEL_ORDER *) realloc(delOrder, ((*delOrderSize)*2) * sizeof(DEL_ORDER));
 			}
 
 			// only add the edge in 1 direction to avoid duplicates. this 'if' checks if we have already visited
@@ -232,14 +182,14 @@ void handleDeletion()
 	// sort the edgeCnt according to cmpBtwn: highest to lowest
 	qsort(delOrder,(orderIdx),sizeof(DEL_ORDER),(void*)cmpBtwn);
 
-	printf("Step %d:\n", step);
+	// printf("Step %d:\n", step);
 	delOrderIdx = -1;
 	do{
 		delOrderIdx++;
 		//remove the edge from each vertex it belongs to
-		removeEdge(delOrder[delOrderIdx].vertex1Idx,delOrder[delOrderIdx].vertex2Idx);
-		removeEdge(delOrder[delOrderIdx].vertex2Idx,delOrder[delOrderIdx].vertex1Idx);
-		edgeCnt--;
+		removeEdge(network, delOrder[delOrderIdx].vertex1Idx,delOrder[delOrderIdx].vertex2Idx);
+		removeEdge(network, delOrder[delOrderIdx].vertex2Idx,delOrder[delOrderIdx].vertex1Idx);
+		(*edgeCnt)--;
 
 		printf("%02d <-> %02d = %.2f\n", network->vertex[delOrder[delOrderIdx].vertex1Idx].id,
 										 network->vertex[delOrder[delOrderIdx].vertex2Idx].id,
@@ -250,12 +200,12 @@ void handleDeletion()
 	// we check the difference above to account for rounding errors with doubles
 	// eg 3.99999997 vs 4.0
 
-	step++;
+	// step++;
 	printf("\n");
 }
 
 // removes edges from vertices and shifts edge[] array left accordingly
-void removeEdge(int vIdx1, int vIdx2)
+void removeEdge(NETWORK* network, int vIdx1, int vIdx2)
 {
 	int degreeShift,
 		degreeIdx;
@@ -288,7 +238,7 @@ int cmpBtwn(DEL_ORDER *e1, DEL_ORDER *e2)
 
 // reset the vertices shortest path and visited variables for the next
 // round with a new root node
-void resetVertices()
+void resetVertices(NETWORK* network)
 {
 	int vertexIdx;
 

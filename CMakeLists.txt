@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+project(GN LANGUAGES C)
+include_directories(${PROJECT_SOURCE_DIR})
+add_subdirectory(gn)
+add_subdirectory(test)
