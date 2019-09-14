@@ -17,7 +17,7 @@ double square(double x)
 }
 
 
-void construct_network(NETWORK** network_ptr, double array_list[][3], int num_edges, int num_vertices) {
+void construct_network(NETWORK** network_ptr, double** array_list, int num_edges, int num_vertices) {
     NETWORK* network = (NETWORK*)malloc(sizeof(NETWORK));
     network->nvertices = num_vertices;
     network->nedges = num_edges;
