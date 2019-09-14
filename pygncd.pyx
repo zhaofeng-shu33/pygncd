@@ -25,9 +25,10 @@ cpdef gn_inner_routine(networkx_graph):
         array_list[i] = <double*>malloc(sizeof(double*) * 3)
     
     i = 0
+    smallest_node_index = next(networkx_graph.nodes.__iter__())
     for u,v,w in networkx_graph.edges(data='weight', default=1):
-        array_list[i][0] = <double>u
-        array_list[i][1] = <double>v
+        array_list[i][0] = <double>(u-smallest_node_index)
+        array_list[i][1] = <double>(v-smallest_node_index)
         array_list[i][2] = <double>w
         i += 1
     

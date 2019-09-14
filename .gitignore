@@ -1,3 +1,4 @@
 **/build
 *.pyd
+pygncd.egg-info
 pygncd.c
