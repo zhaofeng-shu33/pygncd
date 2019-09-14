@@ -7,9 +7,7 @@ int main()
     DEL_ORDER* delOrder;
     NETWORK* network = NULL;
     clock_t    begin, end;
-    int        delOrderSize = 0, // size of delOrder[]
-        totalEdges = 0, 	 // total edges
-        edgeCnt = 0, 	 // counter for edges
+    int        delOrderSize = 0, // size of delOrder[]        
         step = 1; 	 	 // steps of the GN alg
 	FILE *fp;
 	int  vertexIdx;
@@ -24,30 +22,22 @@ int main()
 	}
     begin = clock();
 	// parse file into NETWORK structure
-	read_network(network,fp);
+	read_network(network, fp);
 
-	// compute number of edgeCnt
-	for (vertexIdx = 0; vertexIdx < network->nvertices;vertexIdx++)
-	{
-		edgeCnt += network->vertex[vertexIdx].degree;
-	}
-
-	delOrderSize = edgeCnt;
+	delOrderSize = network->nedges;
 	delOrder = (DEL_ORDER *) malloc(delOrderSize * sizeof(DEL_ORDER));
-	edgeCnt /= 2;
-	totalEdges = edgeCnt;
 
 	printf("Nodes: %d\n", network->nvertices);
-	printf("Edges: %d\n\n", totalEdges);
+	printf("Edges: %d\n\n", network->nedges);
 
-	while(edgeCnt > 0)
+	while(network->nedges > 0)
 	{
-		computeGN(network, delOrder, 0, network->nvertices, delOrderSize, totalEdges);
-		handleDeletion(network, delOrder, &delOrderSize, &edgeCnt);
+		computeGN(network, delOrder, 0, network->nvertices, delOrderSize);
+		handleDeletion(network, delOrder, &delOrderSize);
 	}
 
 	printf("Nodes: %d\n", network->nvertices);
-	printf("Edges: %d\n\n", totalEdges);
+	printf("Edges: %d\n\n", network->nedges);
 
 	end = clock();
 	printf("\nExecution time: %lf", (double)(end - begin) / CLOCKS_PER_SEC);

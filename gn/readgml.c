@@ -408,6 +408,19 @@ void read_edges(NETWORK *network)
   return;
 }
 
+void count_edges(NETWORK* network)
+{
+    int result = 0;
+    int vertexIdx;
+    for (vertexIdx = 0; vertexIdx < network->nvertices; vertexIdx++)
+    {
+        result += network->vertex[vertexIdx].degree;
+    }
+    if (!network->directed)
+        result /= 2;
+
+    network->nedges = result;
+}
 
 // Function to read a complete network
 
@@ -417,6 +430,7 @@ int read_network(NETWORK *network, FILE *stream)
   create_network(network);
   get_degrees(network);
   read_edges(network);
+  count_edges(network);
   free_buffer();
 
   return 0;

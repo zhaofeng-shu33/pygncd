@@ -10,7 +10,7 @@
 
 
 
-void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, int delOrderSize, int totalEdges)
+void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, int delOrderSize)
 {
 	VERTEXNODE *head,
 			   *tail,
@@ -135,7 +135,7 @@ void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, i
 		if(communityPrinted)
 		{
 			printf("\n");
-			modularity += ((double)comEdgeTotal/(double)(totalEdges)) - (square(comDegreeTotal) / (4*square(totalEdges)));
+			modularity += ((double)comEdgeTotal/(double)(network->nedges)) - (square(comDegreeTotal) / (4*square(network->nedges)));
 			comDegreeTotal = 0;
 			comEdgeTotal = 0;
 		}
@@ -145,7 +145,7 @@ void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, i
 
 // adds flows to delOrder array. sorts and removes edgeCnt from graph
 // resets flowSum for each node
-void handleDeletion(NETWORK* network, DEL_ORDER* delOrder, int* delOrderSize, int* edgeCnt)
+void handleDeletion(NETWORK* network, DEL_ORDER* delOrder, int* delOrderSize)
 {
 	int delOrderIdx,
 		vertexIdx,
@@ -189,7 +189,7 @@ void handleDeletion(NETWORK* network, DEL_ORDER* delOrder, int* delOrderSize, in
 		//remove the edge from each vertex it belongs to
 		removeEdge(network, delOrder[delOrderIdx].vertex1Idx,delOrder[delOrderIdx].vertex2Idx);
 		removeEdge(network, delOrder[delOrderIdx].vertex2Idx,delOrder[delOrderIdx].vertex1Idx);
-		(*edgeCnt)--;
+		(network->nedges)--;
 
 		printf("%02d <-> %02d = %.2f\n", network->vertex[delOrder[delOrderIdx].vertex1Idx].id,
 										 network->vertex[delOrder[delOrderIdx].vertex2Idx].id,

@@ -12,10 +12,7 @@ typedef struct {
 }DEL_ORDER;
 
 int cmpBtwn(DEL_ORDER *e1, DEL_ORDER *e2);
-void removeEdge(int vIdx1, int vIdx2);
-void resetVertices();
-void handleDeletion();
-void computeGN(int initIdx, int endIdx);
+
 double square (double x); //faster than pow() for doubles
 
 typedef struct {
@@ -42,6 +39,7 @@ typedef struct {
 
 typedef struct {
   int nvertices;     // Number of vertices in network
+  int nedges;        // Number of edges in network
   int directed;      // 1 = directed network, 0 = undirected
   VERTEX *vertex;    // Array of VERTEX structs, one for each vertex
 } NETWORK;
