@@ -11,7 +11,7 @@ cdef extern from "gn/network.h":
 cdef extern from "gn/gn.h":
     void girvan_newman(NETWORK*, LABELLIST*)
     
-cdef gn_inner_routine(networkx_graph):
+cpdef gn_inner_routine(networkx_graph):
     cdef int nedges, nvertices
     cdef int i
     cdef NETWORK* network
