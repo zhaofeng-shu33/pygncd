@@ -1,8 +1,9 @@
 #include "time.h"
 #include <stdlib.h>
+#include <assert.h>
 #include "gn/gn.h"
 #include "gn/readgml.h"
-int main()
+void test_complete_routine()
 {
     NETWORK* network = NULL;
     clock_t    begin, end;
@@ -26,4 +27,41 @@ int main()
     printf("\nExecution time: %lf", (double)(end - begin) / CLOCKS_PER_SEC);
 
 	free_network(network);
+}
+void test_get_community_structure() {
+    double a[][3] = { {0, 1, 1}, {2, 3, 1}};
+    NETWORK* network = NULL;
+    construct_network(&network, a, 2, 4);
+    int labels[4];
+    int ncomponents = get_community_structure(network, labels);
+    assert(ncomponents, 2);
+    assert(labels[0], 0);
+    assert(labels[1], 0);
+    assert(labels[2], 1);
+    assert(labels[3], 1);
+    free_network(network);
+}
+
+void test_construct_network() {
+    double a[][3] = { {0, 1, 1}, {0, 2, 1}, {1, 2, 5} };
+    NETWORK* network = NULL;
+    construct_network(&network, a, 3, 3);
+    free_network(network);
+}
+
+void test_handleDeletion() {
+    double a[][3] = { {0, 1, 1}, {0, 2, 1}, {1, 2, 5} };
+    NETWORK* network = NULL;
+    construct_network(&network, a, 3, 3);
+    int labels[3];
+    int ncomponents = get_community_structure(network, labels);
+    assert(ncomponents, 1);
+    free_network(network);
+}
+
+int main() {
+    test_construct_network();
+    test_get_community_structure();
+    test_handleDeletion();
+    test_complete_routine();
 }
