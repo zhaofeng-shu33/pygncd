@@ -353,8 +353,10 @@ void read_edges(NETWORK *network)
 
   for (i=0; i<network->nvertices; i++) {
     network->vertex[i].edge = malloc(network->vertex[i].degree*sizeof(EDGE));
+    network->vertex[i].edge->flow = 0;
+    network->vertex[i].edge->flowSum = 0;
   }
-  count = calloc(network->nvertices,sizeof(int));
+  count = calloc(network->nvertices, sizeof(int));
 
   // Read in the data
 
