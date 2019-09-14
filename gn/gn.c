@@ -2,6 +2,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "math.h"
+#include <stdio.h>
 #include "time.h"
 
 #define ERROR_BOUND .0001
@@ -10,7 +11,7 @@
 
 
 
-void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, int delOrderSize)
+void computeGN(NETWORK* network, int initIdx, int endIdx)
 {
 	VERTEXNODE *head,
 			   *tail,
@@ -23,9 +24,9 @@ void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, i
 	           degreeIdx,
 			   edgeIdx;
 
-
+#if _DEBUG
 	printf("Communities: \n");
-	memset(delOrder, 0, delOrderSize*sizeof(*delOrder));
+#endif	
 
 	for (vertexIdx = initIdx; vertexIdx < endIdx; vertexIdx++)
 	{
@@ -90,7 +91,9 @@ void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, i
 
 			if (network->vertex[head->vertexIdx].grouped == 0)
 			{
+#if _DEBUG
 				printf("%02d ", network->vertex[head->vertexIdx].id);
+#endif
 				network->vertex[head->vertexIdx].grouped = 1;
 				comDegreeTotal += network->vertex[head->vertexIdx].degree;
 				comEdgeTotal = comDegreeTotal/2;
@@ -134,18 +137,22 @@ void computeGN(NETWORK* network, DEL_ORDER* delOrder, int initIdx, int endIdx, i
 
 		if(communityPrinted)
 		{
+#if _DEBUG
 			printf("\n");
+#endif
 			modularity += ((double)comEdgeTotal/(double)(network->nedges)) - (square(comDegreeTotal) / (4*square(network->nedges)));
 			comDegreeTotal = 0;
 			comEdgeTotal = 0;
 		}
 	}
+#if _DEBUG
 	printf("\nModularity: %f\n\n", modularity);
+#endif
 }
 
 // adds flows to delOrder array. sorts and removes edgeCnt from graph
 // resets flowSum for each node
-void handleDeletion(NETWORK* network, DEL_ORDER* delOrder, int* delOrderSize)
+void handleDeletion(NETWORK* network, DEL_ORDER* delOrder)
 {
 	int delOrderIdx,
 		vertexIdx,
@@ -159,12 +166,6 @@ void handleDeletion(NETWORK* network, DEL_ORDER* delOrder, int* delOrderSize)
 		for (degreeIdx = 0; degreeIdx < network->vertex[vertexIdx].degree; degreeIdx++)
 		{
 			edgeIdx = network->vertex[vertexIdx].edge[degreeIdx].target;
-			// realloc size of delOrder if need be...double it to be safe...realloc is expensive...
-			if ((orderIdx + 1) > (*delOrderSize))
-			{
-				(*delOrderSize) = (*delOrderSize)*2;
-				delOrder = (DEL_ORDER *) realloc(delOrder, ((*delOrderSize)*2) * sizeof(DEL_ORDER));
-			}
 
 			// only add the edge in 1 direction to avoid duplicates. this 'if' checks if we have already visited
 			// one of the vertices corresponding to the same edge. this could also be > if we wanted. need to simply
@@ -182,7 +183,7 @@ void handleDeletion(NETWORK* network, DEL_ORDER* delOrder, int* delOrderSize)
 	// sort the edgeCnt according to cmpBtwn: highest to lowest
 	qsort(delOrder,(orderIdx),sizeof(DEL_ORDER),(void*)cmpBtwn);
 
-	// printf("Step %d:\n", step);
+	
 	delOrderIdx = -1;
 	do{
 		delOrderIdx++;
@@ -190,18 +191,19 @@ void handleDeletion(NETWORK* network, DEL_ORDER* delOrder, int* delOrderSize)
 		removeEdge(network, delOrder[delOrderIdx].vertex1Idx,delOrder[delOrderIdx].vertex2Idx);
 		removeEdge(network, delOrder[delOrderIdx].vertex2Idx,delOrder[delOrderIdx].vertex1Idx);
 		(network->nedges)--;
-
+#if _DEBUG
 		printf("%02d <-> %02d = %.2f\n", network->vertex[delOrder[delOrderIdx].vertex1Idx].id,
 										 network->vertex[delOrder[delOrderIdx].vertex2Idx].id,
 										 delOrder[delOrderIdx].flow);
+#endif
 	}while(fabs(delOrder[delOrderIdx].flow - delOrder[delOrderIdx+1].flow) < ERROR_BOUND);
 
+#if _DEBUG
 	printf("\n----------------------------------------\n");
 	// we check the difference above to account for rounding errors with doubles
-	// eg 3.99999997 vs 4.0
-
-	// step++;
+	// eg 3.99999997 vs 4.0	
 	printf("\n");
+#endif
 }
 
 // removes edges from vertices and shifts edge[] array left accordingly
@@ -253,4 +255,33 @@ void resetVertices(NETWORK* network)
 double square (double x)
 {
 	return (x * x);
+}
+
+void girvan_newman(NETWORK* network) {
+    DEL_ORDER* delOrder;
+    int        delOrderSize; // size of delOrder[]        
+    int step = 0;
+    delOrderSize = network->nedges;
+    delOrder = (DEL_ORDER *)malloc(delOrderSize * sizeof(DEL_ORDER));
+
+#if _DEBUG
+    printf("Nodes: %d\n", network->nvertices);
+    printf("Edges: %d\n\n", network->nedges);
+#endif
+    while (network->nedges > 0)
+    {
+#if _DEBUG
+        printf("Step %d:\n", step);
+        step++;
+#endif
+        memset(delOrder, 0, delOrderSize * sizeof(*delOrder));
+        computeGN(network, 0, network->nvertices);
+        handleDeletion(network, delOrder);
+        
+    }
+#if _DEBUG
+    printf("Nodes: %d\n", network->nvertices);
+    printf("Edges: %d\n\n", network->nedges);
+#endif
+    free(delOrder);
 }
