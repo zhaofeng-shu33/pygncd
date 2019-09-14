@@ -1,13 +1,14 @@
 from libc.stdlib cimport malloc, free
 
 cdef extern from "gn/network.h":
-    struct NETWORK
+    struct NETWORK:
+        pass
     struct LABELLIST:
         pass
     void construct_network(NETWORK**, double**, int, int)
 
 cdef extern from "gn/gn.h":
-    cdef girvan_newman(NETWORK*, LABELLIST*)
+    void girvan_newman(NETWORK*, LABELLIST*)
     
 cdef gn_inner_routine(networkx_graph):
     cdef int nedges, nvertices
