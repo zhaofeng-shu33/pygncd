@@ -49,19 +49,29 @@ void test_construct_network() {
     free_network(network);
 }
 
-void test_handleDeletion() {
+void test_remove_edge_connected_components() {
     double a[][3] = { {0, 1, 1}, {0, 2, 1}, {1, 2, 5} };
     NETWORK* network = NULL;
     construct_network(&network, a, 3, 3);
     int labels[3];
     int ncomponents = get_community_structure(network, labels);
     assert(ncomponents, 1);
+    removeEdge(network, 0, 1);
+    removeEdge(network, 1, 0);
+    removeEdge(network, 0, 2);
+    removeEdge(network, 2, 0);
+    ncomponents = get_community_structure(network, labels);
+    assert(ncomponents, 2);
+    removeEdge(network, 1, 2);
+    removeEdge(network, 2, 1);
+    ncomponents = get_community_structure(network, labels);
+    assert(ncomponents, 3);
     free_network(network);
 }
 
 int main() {
     test_construct_network();
     test_get_community_structure();
-    test_handleDeletion();
+    test_remove_edge_connected_components();
     test_complete_routine();
 }

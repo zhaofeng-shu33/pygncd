@@ -281,7 +281,6 @@ int get_community_structure(NETWORK* network, int* labels) {
     VERTEXNODE *head,
         *tail,
         *temp;
-    double     modularity = 0;
     int    vertexIdx,
         degreeIdx,
         edgeIdx;
@@ -289,9 +288,11 @@ int get_community_structure(NETWORK* network, int* labels) {
     int initIdx = 0;
     int endIdx = network->nvertices;
     resetVertices(network);
+    int *grouped;
+    grouped = calloc(network->nvertices, sizeof(int));
     for (vertexIdx = initIdx; vertexIdx < endIdx; vertexIdx++)
     {
-        if (network->vertex[vertexIdx].grouped)
+        if (grouped[vertexIdx])
             continue;
         label_index++;
         head = (VERTEXNODE *)malloc(sizeof(VERTEXNODE));
@@ -338,10 +339,10 @@ int get_community_structure(NETWORK* network, int* labels) {
             // so that we don't print the community as many times as it has members.
             // aka, only print it from one community members perspective
 
-            if (network->vertex[head->vertexIdx].grouped == 0)
+            if (grouped[head->vertexIdx] == 0)
             {
                 labels[network->vertex[head->vertexIdx].id] = label_index;
-                network->vertex[head->vertexIdx].grouped = 1;
+                grouped[head->vertexIdx] = 1;
             }
        
             temp = head->prev;
@@ -351,5 +352,6 @@ int get_community_structure(NETWORK* network, int* labels) {
         }
 
     }
+    free(grouped);
     return label_index + 1;
 }
