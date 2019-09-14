@@ -30,6 +30,7 @@ void construct_network(NETWORK** network_ptr, double array_list[][3], int num_ed
         network->vertex[t].degree++;
     }
     for (i = 0; i < network->nvertices; i++) {
+        network->vertex[i].id = i;
         network->vertex[i].edge = malloc(network->vertex[i].degree * sizeof(EDGE));
         network->vertex[i].edge->flow = 0;
         network->vertex[i].edge->flowSum = 0;

@@ -48,11 +48,11 @@ void test_get_community_structure() {
     construct_network(&network, a, 2, 4);
     int labels[4];
     int ncomponents = get_community_structure(network, labels);
-    assert(ncomponents, 2);
-    assert(labels[0], 0);
-    assert(labels[1], 0);
-    assert(labels[2], 1);
-    assert(labels[3], 1);
+    assert(ncomponents == 2);
+    assert(labels[0] == 0);
+    assert(labels[1] == 0);
+    assert(labels[2] == 1);
+    assert(labels[3] == 1);
     free_network(network);
 }
 
@@ -69,17 +69,17 @@ void test_remove_edge_connected_components() {
     construct_network(&network, a, 3, 3);
     int labels[3];
     int ncomponents = get_community_structure(network, labels);
-    assert(ncomponents, 1);
+    assert(ncomponents == 1);
     removeEdge(network, 0, 1);
     removeEdge(network, 1, 0);
     removeEdge(network, 0, 2);
     removeEdge(network, 2, 0);
     ncomponents = get_community_structure(network, labels);
-    assert(ncomponents, 2);
+    assert(ncomponents == 2);
     removeEdge(network, 1, 2);
     removeEdge(network, 2, 1);
     ncomponents = get_community_structure(network, labels);
-    assert(ncomponents, 3);
+    assert(ncomponents == 3);
     free_network(network);
 }
 

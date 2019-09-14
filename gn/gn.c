@@ -350,7 +350,7 @@ int get_community_structure(NETWORK* network, int* labels) {
 
             if (grouped[head->vertexIdx] == 0)
             {
-                labels[network->vertex[head->vertexIdx].id] = label_index;
+                labels[head->vertexIdx] = label_index;
                 grouped[head->vertexIdx] = 1;
             }
        
