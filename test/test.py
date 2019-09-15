@@ -1,5 +1,4 @@
 import os
-import pickle
 import unittest
 import networkx as nx
 from pygncd import gn_inner_routine

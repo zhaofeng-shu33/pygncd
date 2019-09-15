@@ -1,0 +1,14 @@
+os: linux
+dist: xenial
+language: python
+python: 3.6
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - cp ../test/karate.gml ./
+  - test/test
+  - python setup.py build_ext --inplace
+  - python test/test.py
+  - python test/test_GN.py
