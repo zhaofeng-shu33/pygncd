@@ -17,8 +17,8 @@ cpdef gn_inner_routine(networkx_graph):
     cdef NETWORK* network
     cdef LABELLIST* label_header, *tmp
     cdef double (*array_list)[3]
-    nedges = len(networkx_graph.nodes)
-    nvertices = len(networkx_graph.edges)
+    nedges = len(networkx_graph.edges)
+    nvertices = len(networkx_graph.nodes)
     array_list = <double(*)[3]>malloc(3 * sizeof(double) * nedges)
     label_header = <LABELLIST*>malloc(sizeof(LABELLIST))
     
