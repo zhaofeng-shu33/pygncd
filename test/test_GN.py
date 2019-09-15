@@ -12,5 +12,7 @@ class TestGN(unittest.TestCase):
         gn = GN()
         gn.fit(g)
         print(gn.tree)
+        for i in gn.partition_list:
+            print(i)
 if __name__ == '__main__':
     unittest.main()
