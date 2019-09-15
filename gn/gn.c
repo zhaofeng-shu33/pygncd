@@ -182,7 +182,7 @@ void handleDeletion(NETWORK* network, DEL_ORDER* delOrder)
 	}
 
 	// sort the edgeCnt according to cmpBtwn: highest to lowest
-	qsort(delOrder,(orderIdx),sizeof(DEL_ORDER),(void*)cmpBtwn);
+	qsort(delOrder, orderIdx, sizeof(DEL_ORDER), cmpBtwn);
 
 	
 	delOrderIdx = -1;
@@ -265,7 +265,7 @@ void girvan_newman(NETWORK* network, LABELLIST *label_header) {
         printf("Step %d:\n", step);
         step++;
 #endif
-        memset(delOrder, 0, delOrderSize * sizeof(*delOrder));
+        memset(delOrder, 0, delOrderSize * sizeof(DEL_ORDER));
         computeGN(network, 0, network->nvertices);
         if (ncomponents < network->ncomponents) {
             label_header->next = malloc(sizeof(LABELLIST));
