@@ -32,9 +32,8 @@ void construct_network(NETWORK** network_ptr, double array_list[][3], int num_ed
     }
     for (i = 0; i < network->nvertices; i++) {
         network->vertex[i].id = i;
+        network->vertex[i].flowAvail = 0;
         network->vertex[i].edge = malloc(network->vertex[i].degree * sizeof(EDGE));
-        network->vertex[i].edge->flow = 0;
-        network->vertex[i].edge->flowSum = 0;
     }
     int *count;
     count = calloc(network->nvertices, sizeof(int));
@@ -43,9 +42,13 @@ void construct_network(NETWORK** network_ptr, double array_list[][3], int num_ed
         int t = (int)array_list[i][1];
         double w = array_list[i][2];
         network->vertex[s].edge[count[s]].target = t;
+        network->vertex[s].edge[count[s]].flow = 0;
+        network->vertex[s].edge[count[s]].flowSum = 0;
         network->vertex[s].edge[count[s]].weight = w;
         count[s]++;
         network->vertex[t].edge[count[t]].target = s;
+        network->vertex[t].edge[count[t]].flow = 0;
+        network->vertex[t].edge[count[t]].flowSum = 0;
         network->vertex[t].edge[count[t]].weight = w;
         count[t]++;
     }

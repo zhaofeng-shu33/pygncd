@@ -22,7 +22,7 @@ def set_up_cython_extension():
     sourcefiles.extend(find_all_c_files(os.path.join(os.getcwd(), 'gn'), exclude='readgml.c'))
     extensions = [
         Extension('pygncd', sourcefiles,
-                  include_dirs=extra_include_path,
+                  include_dirs=extra_include_path
                  )
     ]
     return cythonize(extensions)
