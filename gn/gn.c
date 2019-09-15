@@ -7,11 +7,6 @@
 
 #define ERROR_BOUND .0001
 
-
-#ifndef _DEBUG
-#define _DEBUG 1
-#endif
-
 void computeGN(NETWORK* network, int initIdx, int endIdx)
 {
 	VERTEXNODE *head,
