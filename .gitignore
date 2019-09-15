@@ -5,3 +5,4 @@ __pycache__
 *.pdb
 pygncd.egg-info
 pygncd.c
+dist
