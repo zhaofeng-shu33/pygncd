@@ -183,7 +183,7 @@ void handleDeletion(NETWORK* network, DEL_ORDER* delOrder)
 	}
 
 	// sort the edgeCnt according to cmpBtwn: highest to lowest
-	qsort(delOrder, (orderIdx), sizeof(DEL_ORDER), cmpBtwn);
+	qsort(delOrder, orderIdx, sizeof(DEL_ORDER), cmpBtwn);
 
 	
 	delOrderIdx = -1;
