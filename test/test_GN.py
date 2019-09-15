@@ -1,6 +1,10 @@
 import os
 import unittest
+
+import networkx as nx
+
 from GN import GN
+
 class TestGN(unittest.TestCase):
     def test_gn_wrapper(self):
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -8,3 +12,5 @@ class TestGN(unittest.TestCase):
         gn = GN()
         gn.fit(g)
         print(gn.tree)
+if __name__ == '__main__':
+    unittest.main()

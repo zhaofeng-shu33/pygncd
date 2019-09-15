@@ -50,7 +50,7 @@ class GN:
             if(val >= i):
                 index = ind
                 break
-        cat = np.zeros(len(self.Orig_deg))
+        cat = np.zeros(len(self.G.nodes))
         t = 0
         for j in self.partition_list[index]:
             for r in j:
