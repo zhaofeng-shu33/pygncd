@@ -11,5 +11,6 @@ script:
   - test/test
   - cd ..
   - python setup.py build_ext --inplace
+  - pip install -e .
   - python test/test.py
   - python test/test_GN.py
