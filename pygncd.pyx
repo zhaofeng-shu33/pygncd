@@ -35,10 +35,14 @@ cpdef gn_inner_routine(networkx_graph):
     py_labels_list = []
     while label_header.next != NULL:
         py_labels = []
-        label_header = label_header.next
         for i in range(nvertices):
             py_labels.append(label_header.labels[i])
         py_labels_list.append(py_labels)
+        label_header = label_header.next        
+    py_labels = []
+    for i in range(nvertices):
+        py_labels.append(label_header.labels[i])
+    py_labels_list.append(py_labels)        
     while label_header.prev != NULL:
         tmp = label_header.prev
         free(label_header.labels)
