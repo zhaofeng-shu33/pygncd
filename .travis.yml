@@ -9,6 +9,7 @@ script:
   - make
   - cp ../test/karate.gml ./
   - test/test
+  - cd ..
   - python setup.py build_ext --inplace
   - python test/test.py
   - python test/test_GN.py
