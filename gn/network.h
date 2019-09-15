@@ -57,7 +57,7 @@ typedef struct VERTEXNODE
 typedef struct LABELLIST
 {
     int* labels;
-    struct LABELLIST *next;
-    struct VERTEXNODE *prev;
+    struct LABELLIST* next;
+    struct LABELLIST* prev;
 } LABELLIST;
 #endif

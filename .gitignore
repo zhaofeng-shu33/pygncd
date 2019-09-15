@@ -1,1 +1,7 @@
+__pycache__
 **/build
+*.so
+*.pyd
+*.pdb
+pygncd.egg-info
+pygncd.c

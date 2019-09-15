@@ -1,0 +1,6 @@
+networkx
+cython
+numpy
+ete3
+six
+scipy
