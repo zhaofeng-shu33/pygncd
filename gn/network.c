@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "gn/network.h"
 
 // compare edge flows highest to lowest

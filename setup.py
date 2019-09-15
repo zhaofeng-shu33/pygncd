@@ -5,10 +5,10 @@ from Cython.Build import cythonize # pylint: disable=import-error
 with open('README.md') as fh:
     LONG_DESCRIPTION = fh.read()
 
-def find_all_c_files(given_dir):
+def find_all_c_files(given_dir, exclude=[]):
     c_file_list = []
     for i in os.listdir(given_dir):
-        if i.find('c') > 0:
+        if i.find('c') > 0 and exclude.count(i) == 0:
             c_file_list.append(os.path.join(given_dir, i))
     return c_file_list
     
@@ -19,7 +19,7 @@ def set_up_cython_extension():
 
     # collect library
     sourcefiles = ['pygncd.pyx']
-    sourcefiles.extend(find_all_c_files(os.path.join(os.getcwd(), 'gn')))
+    sourcefiles.extend(find_all_c_files(os.path.join(os.getcwd(), 'gn'), exclude='readgml.c'))
     extensions = [
         Extension('pygncd', sourcefiles,
                   include_dirs=extra_include_path,
