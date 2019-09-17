@@ -4,11 +4,15 @@ matrix:
     dist: xenial
     language: python
     python: 3.6
+    services: docker
+    env: DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
   - os: osx
     osx_image: xcode10.2
     
 script:
   - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
        ./build.sh
+    else
+       docker run -v `pwd`:/code $DOCKER_IMAGE /bin/bash -c 'cd /code; ./build_manylinux.sh' 
     fi
