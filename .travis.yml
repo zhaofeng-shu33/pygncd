@@ -23,9 +23,4 @@ script:
     else
        docker run -v `pwd`:/code $DOCKER_IMAGE /bin/bash -c 'cd /code; ./build_manylinux.sh' 
     fi
-deploy:
-  provider: script
-  script: ./deploy.sh
-  skip_cleanup: true
-  on:
-    branch: master
+  - ./deploy.sh
