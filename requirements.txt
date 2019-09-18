@@ -4,3 +4,4 @@ numpy
 ete3
 six
 scipy
+twine
