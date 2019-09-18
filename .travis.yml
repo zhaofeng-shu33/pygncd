@@ -11,7 +11,7 @@ matrix:
 install:
   - |
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-       python3 -m pip install -r requirements.txt
+       sudo python3 -m pip install -r requirements.txt
     fi    
 script:
   - |
@@ -20,3 +20,9 @@ script:
     else
        docker run -v `pwd`:/code $DOCKER_IMAGE /bin/bash -c 'cd /code; ./build_manylinux.sh' 
     fi
+deploy:
+  provider: pypi
+  user: zhaofeng-shu33
+  password: $TWINE_PASSWORD
+  on:
+    branch: master
