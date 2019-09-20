@@ -1,0 +1,25 @@
+branches:
+  only:
+    - master
+version: 1.0.{build}
+image: Visual Studio 2017
+environment:
+  TWINE_PASSWORD:
+    secure: cDgJ0l9hLc0cTXODMVfjnA==
+install:
+- cmd: >-
+    C:\Python36-x64\python.exe -m pip install wheel cython twine
+    
+    C:\Python37-x64\python.exe -m pip install wheel cython twine
+    
+build: off
+build_script:
+- cmd: >-
+    C:\Python36-x64\python.exe -m pip wheel . -w dist --no-deps
+    
+    C:\Python37-x64\python.exe -m pip wheel . -w dist --no-deps
+               
+deploy_script:
+- cmd: >-
+    
+    C:\Python36-x64\python.exe -m twine upload dist/* -u zhaofeng-shu33 || ver>nul
