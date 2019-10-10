@@ -37,7 +37,7 @@ setup(
     install_requires=['networkx'],
     author_email="616545598@qq.com",
     description="a hierachical community detection algorithm by Girvan Newman",
-    url="https://github.com/zhaofeng-shu33/Girvan-Newman",
+    url="https://github.com/zhaofeng-shu33/pygncd",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     classifiers=[
